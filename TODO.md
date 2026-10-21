@@ -222,7 +222,7 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` feito · `[!]` bloqueado
 
 ---
 
-## Fase 7 — Publicação no GitHub  ✅ (CI pendente)
+## Fase 7 — Publicação no GitHub  ✅
 
 - [x] Sanitizar todo o conteúdo: senha removida, série → `XXXXXXXXX`,
       fixtures/dataset/transcript **sintéticos**
@@ -235,12 +235,14 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` feito · `[!]` bloqueado
 - [x] `README.md` — seção **Privacidade**
 - [x] Publicar: **https://github.com/henriquegouveia85/accu-chek-active-linux**
       (público, branch `master`, 1 commit, 41 arquivos, ~500 KB)
-- [!] `.github/workflows/ci.yml` (ruff + pytest + relatório) — escrito e
-      validado localmente, mas o **push foi recusado**: o token do `gh` não
-      tem o escopo `workflow`. Precisa de `gh auth refresh -s workflow`
-      (device flow no navegador) e depois `git add` + `git push`.
-- [ ] Rotacionar o PAT que estava em texto claro no `.git/config` de
-      `~/Área de trabalho/crm-vendas-supabase`
+- [x] `.github/workflows/ci.yml` (ruff + pytest + geração do relatório)
+      → escopo `workflow` liberado (`gh auth refresh -s workflow`) e
+      **push aceito**: run `39645240291` → **success**
+- [x] Remote do repo `crm-vendas-supabase` limpo: o PAT em texto claro saiu
+      do `.git/config` e o acesso passou a usar o credential helper do `gh`
+- [ ] **Rotacionar o PAT** que estava em texto claro no remote do
+      `~/Área de trabalho/crm-vendas-supabase` — ação do usuário no GitHub
+      (*Settings → Developer settings → Personal access tokens*)
 
 ---
 
@@ -308,3 +310,16 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` feito · `[!]` bloqueado
   objeto do `.git`. Conteúdo publicado: 41 arquivos, ~500 KB, sem dado de
   saúde, sem senha, sem série do aparelho. **Falta só a CI**, bloqueada pelo
   escopo `workflow` do token do `gh`.
+- **2026-10-21 ~15:45** — **CI publicada e verde**: o escopo `workflow` foi
+  liberado (`gh auth refresh -s workflow`) e o push da
+  `.github/workflows/ci.yml` foi aceito — run `39645240291` → `success`
+  (ruff + 146 testes + geração do relatório a partir do dataset sintético).
+  Revalidação local no hardware real com o aparelho conectado: **121
+  registros**, modelo `2102`, relógio do aparelho com desvio de **31 s**
+  (constante, deriva zero) e **nenhuma** leitura `±INF` (os 2 valores
+  baixos — 9 e 11 mg/dL — são leituras reais, com valor bruto `0x0009` /
+  `0x000B`, não o sentinela `0x0802`).
+  Também foi limpo o remote do repo `crm-vendas-supabase`: o **PAT em
+  texto claro** saiu do `.git/config` e o acesso agora usa o credential
+  helper do `gh`. Resta só **rotacionar** o PAT no GitHub (ação do
+  usuário).

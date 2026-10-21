@@ -20,30 +20,35 @@
 
 | Campo | Valor |
 |---|---|
-| **Data/hora** | 2026-10-21 ~14:35 |
-| **Fase do projeto** | **Fases 0–6 concluídas E validadas no hardware real** — relógio do aparelho sincronizado pelo usuário |
-| **Última ação concluída** | **Sanitização para publicação**: senha removida, série anonimizada, fixtures/dataset/transcript sintéticos gerados, capturas reais fora do git; **146 testes verdes** |
-| **Arquivos criados** | 26 + 3 fixtures + capturas `sessao-02/`, `sessao-03/` e `sessao-04/` (ver inventário abaixo) + `tools/` + `examples/` + `docs/captures/exemplo-sintetico/` |
-| **Hardware** | ✅ Conectado (Bus 001 Device 009) e **funcionando** — a regra udev dispensou o `sudo` |
+| **Data/hora** | 2026-10-21 ~15:45 |
+| **Fase do projeto** | **Fases 0–7 concluídas** — cliente, relatório, publicação no GitHub e CI (verde) |
+| **Última ação concluída** | **CI publicada e passando** (`gh run` → `success`, escopo `workflow` liberado); dump revalidado no hardware real: **121 registros**, relógio do aparelho com desvio de **31 s** |
+| **Arquivos criados** | 26 + 3 fixtures + capturas `sessao-02/`, `sessao-03/` e `sessao-04/` (ver inventário abaixo) + `tools/` + `examples/` + `docs/captures/exemplo-sintetico/` + `.github/workflows/ci.yml` |
+| **Hardware** | ✅ Conectado (Bus 001 Device 002) e **funcionando** — a regra udev dispensou o `sudo` |
 | **Bloqueio atual** | 🟢 Nenhum. (O aparelho se desliga sozinho depois de um tempo de uso — o `dump` precisa ser rodado logo após a reconexão) |
 | **Risco de perda de dados** | 🟢 Baixo — tudo que importa está em arquivo neste repositório |
 
 ### Próximo passo exato
 
-1. (Opcional) Reexportar o PDF do relatório:
+1. **Rotacionar o PAT** que estava em texto claro no remote do repo
+   `~/Área de trabalho/crm-vendas-supabase` (o remote já foi limpo para usar
+   o credential helper do `gh`; a rotação em si é no GitHub →
+   *Settings → Developer settings → Personal access tokens*).
+2. (Opcional) Reexportar o PDF do relatório:
    `google-chrome --headless --print-to-pdf=relatorio.pdf relatorio.html`
-2. (Opcional) Testar o `probe` e o `info` com o aparelho ainda na tela.
-3. (Opcional) Ler o segmento `PMSegMeal` (11073-10417) para ter a marcação
+3. (Opcional) Testar o `probe` e o `info` com o aparelho ainda na tela.
+4. (Opcional) Ler o segmento `PMSegMeal` (11073-10417) para ter a marcação
    real de jejum/pós-prandial no lugar da heurística — exige um TRIG_XFER
    para o handle do segmento de refeições.
-4. (Opcional) Investigar o porquê do relógio interno estar 7 anos atrasado
-   (provável bateria removida). **Nunca** corrigir com `SET_TIME`.
-5. (Opcional) `git init` + primeiro commit — ✅ **feito** (`d5d81b5`).
-6. (Opcional) `git remote add origin <url>` + `git push` para ter uma cópia
-   fora desta máquina (que tem quedas de energia).
-7. (Opcional) **Publicar no GitHub** como `henriquegouveia85/accu-chek-active-linux`
-   (público) — a história do git precisa ser reescrita antes, porque o
-   primeiro commit tem as capturas reais dentro.
+5. (Opcional) Investigar o porquê do relógio interno ter estado 7 anos
+   atrasado (já resolvido: o usuário ajustou no menu; desvio atual = 31 s).
+   **Nunca** corrigir com `SET_TIME`.
+6. (Opcional) `git init` + primeiro commit — ✅ **feito** (`d5d81b5`).
+7. (Opcional) `git remote add origin <url>` + `git push` para ter uma cópia
+   fora desta máquina (que tem quedas de energia) — ✅ **feito**.
+8. (Opcional) **Publicar no GitHub** como `henriquegouveia85/accu-chek-active-linux`
+   (público) — ✅ **feito** (a história do git foi reescrita antes, porque o
+   primeiro commit tinha as capturas reais dentro).
 
 ### Como retomar em uma sessão nova
 
@@ -991,3 +996,68 @@ Até lá, o repositório está publicado e **completo** — só a CI falta.
 - 41 arquivos, ~500 KB, **1 commit**, branch `master`
 - 146 testes verdes, `ruff check src tests tools` limpo
 - Nenhum dado de saúde, nenhuma senha, nenhuma série do aparelho
+
+---
+
+## Diário de bordo — 2026-10-21 ~15:45 — **Retomada: CI verde + limpeza do PAT**
+
+A sessão anterior tinha "travado" logo depois do push da CI. Retomada:
+
+### 1. A CI já estava publicada e passando ✅
+
+O device flow (`gh auth refresh -s workflow`) **tinha sido concluído** — o
+token do `gh` agora tem os escopos `gist, read:org, repo, workflow`, e o
+run está no GitHub:
+
+```
+completed  success  Adiciona CI (ruff + pytest + geração do relatório)
+CI Checks  master  push  39645240291  15s  2026-10-21T17:36:04Z
+```
+
+Ou seja: o `TODO.md` e este diário estavam **atrasados** — a pendência do
+escopo `workflow` já não existia.
+
+### 2. Revalidação no hardware real ✅
+
+O aparelho estava conectado (Bus 001 Device 002), então o `dump` rodou
+**sem sudo** (a regra udev segue valendo):
+
+- **121 registros** (80 + 41), modelo `2102`;
+- relógio do aparelho: `2026-10-21T15:44:33` contra `15:45:04` real →
+  desvio de **31 s**, constante, deriva zero — bate com o ajuste feito no
+  menu às 14:05;
+- **nenhuma** leitura `±INF`: os 2 valores baixos do conjunto (9 e 11 mg/dL)
+  são **leituras reais** (valor bruto `0x0009` / `0x000B`), não o sentinela
+  `0x0802` — por isso o relatório acusa "hipoglicemia grave" e isso é
+  correto, não um artefato do parser;
+- `ruff` limpo e **146 testes verdes**.
+
+### 3. PAT em texto claro removido de dois repositórios 🔐
+
+O mesmo PAT estava no `remote.origin.url` de **dois** repositórios locais
+(além do `crm-vendas-supabase`, também no `Vistoria`). Os dois remotes
+foram reescritos para a URL sem credencial:
+
+```bash
+git -C "<repo>" remote set-url origin https://github.com/<user>/<repo>.git
+```
+
+O acesso passa a usar o credential helper do `gh` (já configurado no
+`~/.gitconfig`: `credential.https://github.com.helper = !gh auth
+git-credential`). Testado com `git ls-remote` nos dois repositórios →
+acesso OK.
+
+⚠️ **O que falta é do usuário:** *rotacionar/revogar* o PAT no GitHub
+(*Settings → Developer settings → Personal access tokens*) — tirá-lo do
+`.git/config` só impede o vazamento local, não revoga o token.
+
+### 4. Other cleanups
+
+- `log.md`: o cabeçalho tinha ficado com um `travou tudo` colado na
+  primeira linha (digitação acidental) → removido;
+- apagado o `libmsi-dev_0.103+repack-1build3_amd64.deb` que estava solto na
+  raiz (download órfão de uma tentativa de instalar `tshark` — que foi
+  descartada: a captura foi feita pelo `usbmon`);
+- `TODO.md` atualizado: Fase 7 agora é **✅ completa**, com a CI verde e a
+  pendência do PAT isolada em um único item.
+
