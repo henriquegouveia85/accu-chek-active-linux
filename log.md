@@ -933,3 +933,61 @@ ignorado).
 
 Reescrever a história do git (branch órfã, um commit limpo), configurar a
 identidade e a CI, e publicar em `henriquegouveia85/accu-chek-active-linux`.
+
+---
+
+## Diário de bordo — 2026-10-21 ~14:50 — **Publicado no GitHub**
+
+O repositório foi criado e publicado:
+**https://github.com/henriquegouveia85/accu-chek-active-linux** (público).
+
+### O que foi feito
+
+1. **Identidade git** trocada para `Henrique Gouveia <henriquegouveia85@gmail.com>`
+   (a local `Henrique <henrique@localhost>` era placeholder).
+2. **História reescrita**: o primeiro commit tinha as capturas reais dentro.
+   Foi criada uma branch órfã (`git checkout --orphan`) com um commit
+   limpo, e a branch antiga foi apagada. Depois, `git reflog expire` +
+   `git gc --prune=now` para **apagar os objetos antigos** — a varredura
+   em todos os blobs do `.git` não acha mais a série nem a senha.
+   (Backup do `.git` antes da surgery: `/tmp/opencode/git-backup-pre-surgery`.)
+3. **Branch `master`** (mesmo nome do outro projeto do usuário).
+4. **`gh auth setup-git`**: o remote agora usa o credential helper do `gh`
+   em vez do **PAT em texto claro** que estava no
+   `.git/config` de `crm-vendas-supabase` — aquele PAT deve ser **rotacionado**.
+5. **CI** (`.github/workflows/ci.yml`): lint com ruff, pytest e geração do
+   relatório a partir do dataset sintético.
+
+### ⚠️ Pendência: o escopo `workflow`
+
+O push da CI foi **recusado** pelo GitHub:
+
+```
+! [remote rejected] HEAD -> master (refusing to allow an OAuth App to
+create or update workflow `.github/workflows/ci.yml` without `workflow` scope)
+```
+
+O token do `gh` tem os escopos `gist, read:org, repo` — falta `workflow`.
+Para liberar, é preciso um **device flow** (o navegador do usuário):
+
+```bash
+gh auth refresh --hostname github.com -s workflow
+# abre https://github.com/login/device e pede um código de uso único
+```
+
+O processo foi deixado **rodando em background** com o código
+`788A-31D2`. Depois de autorizar no navegador, basta:
+
+```bash
+git add .github/workflows/ci.yml
+git commit -m "Adiciona CI (ruff + pytest + geração do relatório)"
+git push
+```
+
+Até lá, o repositório está publicado e **completo** — só a CI falta.
+
+### Estado do repositório publicado
+
+- 41 arquivos, ~500 KB, **1 commit**, branch `master`
+- 146 testes verdes, `ruff check src tests tools` limpo
+- Nenhum dado de saúde, nenhuma senha, nenhuma série do aparelho

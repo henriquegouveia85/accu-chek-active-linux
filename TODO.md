@@ -19,10 +19,10 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` feito · `[!]` bloqueado
       → **instalada e validada**: o device node fica `root:plugdev` (`0660`)
       e o dump roda **sem sudo**
 - [x] `git init` + `.gitignore` (pycache, venv, capturas binárias grandes)
-      → repositório criado em `main`, primeiro commit `d5d81b5` (51 arquivos,
-      14.042 linhas). Fora do histórico: `data.json`, `relatorio.html` e
-      `docs/captures/*/data.json` (dados de saúde legíveis, regeneráveis) e
-      o instalador `SmartPix-*.exe` (244 MB)
+      → repositório criado, histórico **reescrito** na publicação (ver Fase 7):
+      branch `master`, **1 commit**, 41 arquivos. Fora do git: `data.json`,
+      `relatorio.html`, `docs/captures/sessao-*/` (dados de saúde legíveis,
+      regeneráveis) e o instalador `SmartPix-*.exe` (244 MB)
 
 ## Fase 1 — Diagnóstico do dispositivo  ✅ (parcial)
 
@@ -222,6 +222,28 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` feito · `[!]` bloqueado
 
 ---
 
+## Fase 7 — Publicação no GitHub  ✅ (CI pendente)
+
+- [x] Sanitizar todo o conteúdo: senha removida, série → `XXXXXXXXX`,
+      fixtures/dataset/transcript **sintéticos**
+- [x] Reescrever o histórico (branch órfã + `git gc --prune=now`) para que
+      as capturas reais **não existam** em nenhum objeto do `.git`
+      → varredura em todos os blobs: zero ocorrências da série/senha
+- [x] Identidade git → `Henrique Gouveia <henriquegouveia85@gmail.com>`
+- [x] `gh auth setup-git` (credential helper do `gh`, sem PAT em texto claro)
+- [x] `docs/captures/README.md` — o que é publicado vs. o que fica no disco
+- [x] `README.md` — seção **Privacidade**
+- [x] Publicar: **https://github.com/henriquegouveia85/accu-chek-active-linux**
+      (público, branch `master`, 1 commit, 41 arquivos, ~500 KB)
+- [!] `.github/workflows/ci.yml` (ruff + pytest + relatório) — escrito e
+      validado localmente, mas o **push foi recusado**: o token do `gh` não
+      tem o escopo `workflow`. Precisa de `gh auth refresh -s workflow`
+      (device flow no navegador) e depois `git add` + `git push`.
+- [ ] Rotacionar o PAT que estava em texto claro no `.git/config` de
+      `~/Área de trabalho/crm-vendas-supabase`
+
+---
+
 ## Notas de progresso
 
 - **2026-10-21** — Diagnóstico inicial concluído. Aparelho enumerado como
@@ -279,3 +301,10 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` feito · `[!]` bloqueado
   2018, Beck 2019, ADA 2026, SBD, ISO 15197), com a ressalva explícita de que
   TIR/GMI de glicosímetro (SMBG) são aproximações.
   **146 testes verdes.**
+- **2026-10-21** — **Repositório publicado**:
+  https://github.com/henriquegouveia85/accu-chek-active-linux (público).
+  Histórico reescrito (branch órfã → 1 commit limpo) e `git gc` para apagar
+  os objetos antigos — as capturas reais **não existem mais** em nenhum
+  objeto do `.git`. Conteúdo publicado: 41 arquivos, ~500 KB, sem dado de
+  saúde, sem senha, sem série do aparelho. **Falta só a CI**, bloqueada pelo
+  escopo `workflow` do token do `gh`.

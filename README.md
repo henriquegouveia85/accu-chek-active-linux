@@ -5,6 +5,8 @@ Cliente em Python que lê as leituras de glicemia do glicosímetro
 protocolo **ISO/IEEE 11073-20601** (PHDC / MDER) sobre o perfil
 **11073-10417** de glicosímetro.
 
+GitHub: <https://github.com/henriquegouveia85/accu-chek-active-linux>
+
 > **ATENÇÃO: projeto somente leitura.** O cliente nunca define a hora do
 > aparelho, nunca calibra, nunca reseta, nunca atualiza firmware. As únicas
 > APDUs enviadas são as de associação (`E2`/`E3`/`E4`), a de leitura de
